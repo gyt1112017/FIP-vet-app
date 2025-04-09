@@ -1,14 +1,12 @@
-# Page: Request Advice
 import streamlit as st
+
 def show():
-    st.title("📩 Request FIP Case Advice")
+    st.title("📋 Request FIP Treatment Advice")
 
-    with st.form("advice_form"):
-        name = st.text_input("Your Name")
-        practice = st.text_input("Practice Name")
-        email = st.text_input("Email Address")
-        notes = st.text_area("Case Summary / Questions")
+    st.markdown("If you are a vet and need to speak to a specialist then fill out this form to go to our  RCVS Recognised Feline Specialist, please indicate if your query is urgent")
 
-        submitted = st.form_submit_button("Submit Advice Request")
-        if submitted:
-            st.success("✅ Thank you! A team member will be in touch shortly.")
+    st.markdown("""
+    <iframe src="https://share-eu1.hsforms.com/2-vQDDglDQEiXj5qyyc9Vzwg2km5"
+            width="100%" height="800" style="border: none;">
+    </iframe>
+    """, unsafe_allow_html=True)
