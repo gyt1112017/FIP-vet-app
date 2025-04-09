@@ -7,11 +7,26 @@ def apply_theme():
     background-color: #9b26b6;
 }
 
+/* Hover/focus effect for the step buttons */
+button[data-testid="stNumberInputStepUp"]:hover,
+button[data-testid="stNumberInputStepDown"]:hover,
+button[data-testid="stNumberInputStepUp"]:focus,
+button[data-testid="stNumberInputStepDown"]:focus {
+    background-color: #9b26b6 !important;
+    color: white !important;
+}
+
+/* 🟣 When clicked/focused: change border to brand purple */
+div[data-testid="stNumberInputContainer"]:focus-within {
+    border: 1px solid #9b26b6 !important;
+}
+
+
+
 /* Remove unwanted red borders that override your custom theme */
 .st-e0, .st-dz, .st-dy, .st-dx {
-    border-color: #9b26b6 !important;  /* or use #d3d3d3 for neutral */
+    border-color: #d3d3d3 !important;  /* or use  for neutral */
     border-width: 1px !important;
-    border-style: solid !important;
     border-radius: 10px !important;
 }
 
