@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime
-import streamlit.components.v1 as components
+
 
 def show():
     st.title("🧠 Cascade Justification Tool")
@@ -47,15 +47,7 @@ def show():
     st.markdown("""We know this can be a challenging area to navigate, especially if you are new to using Specials products, so we also have podcasts and a webinar on using the cascade. If you have any questions about the correct use of the cascade then please <a href='https://bova.vet/bova-uk/contact-us/' target='_blank'>get in touch.</a>""", unsafe_allow_html=True)
     st.video("https://www.youtube.com/watch?v=hggZPzVqqJE") 
     st.video("https://youtu.be/vkRWI64hJDI") 
-    # Embed Buzzsprout podcast player using raw HTML + JS
-buzzsprout_embed = """
-<div id="buzzsprout-player-10556201"></div>
-<script src="https://www.buzzsprout.com/1871565/episodes/10556201-the-veterinary-prescribing-cascade-part-1-equine.js?container_id=buzzsprout-player-10556201&player=small" 
-type="text/javascript" charset="utf-8"></script>
-"""
 
-# Render it in the Streamlit app
-components.html(buzzsprout_embed, height=200, scrolling=False)
     col1, col2 = st.columns(2)
 
     with col1:
