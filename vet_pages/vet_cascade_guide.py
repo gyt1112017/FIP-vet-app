@@ -57,7 +57,7 @@ def show():
         _“Demystifying the cascade in equine cases with real-world examples. A must-listen for equine vets.”_
 
         <iframe src="https://www.buzzsprout.com/1871565/10556201-the-veterinary-prescribing-cascade-part-1-equine?client_source=small_player&iframe=true" 
-                width="100%" height="160" frameborder="0" scrolling="no">
+                width="100%" height="180" frameborder="0" scrolling="no">
         </iframe>
         """, unsafe_allow_html=True)
 
@@ -67,7 +67,7 @@ def show():
         _“Using the cascade in small animal cases, especially antimicrobial use, with post-Brexit context.”_
 
         <iframe src="https://www.buzzsprout.com/1871565/10557213-the-veterinary-prescribing-cascade-part-2-small-animal?client_source=small_player&iframe=true" 
-                width="100%" height="160" frameborder="0" scrolling="no">
+                width="100%" height="180" frameborder="0" scrolling="no">
         </iframe>
         """, unsafe_allow_html=True)
     
