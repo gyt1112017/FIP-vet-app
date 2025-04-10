@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import streamlit.components.v1 as components
 
 def show():
     st.title("🧠 Cascade Justification Tool")
@@ -47,7 +48,12 @@ def show():
     st.video("https://www.youtube.com/watch?v=hggZPzVqqJE") 
     st.video("https://youtu.be/vkRWI64hJDI") 
     st.markdown("")
+    html_code = """
+<div id="buzzsprout-player-10556201"></div>
+<script src="https://www.buzzsprout.com/1871565/episodes/10556201-the-veterinary-prescribing-cascade-part-1-equine.js?container_id=buzzsprout-player-10556201&player=small" type="text/javascript" charset="utf-8"></script>
+"""
 
+components.html(html_code, height=200, scrolling=False)
     col1, col2 = st.columns(2)
 
     with col1:
