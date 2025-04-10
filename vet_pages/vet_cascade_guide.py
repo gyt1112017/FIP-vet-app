@@ -47,6 +47,20 @@ def show():
     st.markdown("""We know this can be a challenging area to navigate, especially if you are new to using Specials products, so we also have podcasts and a webinar on using the cascade. If you have any questions about the correct use of the cascade then please <a href='https://bova.vet/bova-uk/contact-us/' target='_blank'>get in touch.</a>""", unsafe_allow_html=True)
     st.video("https://www.youtube.com/watch?v=hggZPzVqqJE") 
     st.video("https://youtu.be/vkRWI64hJDI") 
+    
+    st.markdown("### 🎧 The Veterinary Prescribing Cascade (Part 1): Equine")
+st.markdown("""
+<iframe src="https://www.buzzsprout.com/1871565/10556201-the-veterinary-prescribing-cascade-part-1-equine?client_source=small_player&iframe=true" 
+        width="100%" height="140" frameborder="0" scrolling="no">
+</iframe>
+""", unsafe_allow_html=True)
+st.markdown("### 🎧 The Veterinary Prescribing Cascade (Part 2): Small Animal")
+st.markdown("""
+<iframe src="https://www.buzzsprout.com/1871565/10557213-the-veterinary-prescribing-cascade-part-2-small-animal?client_source=small_player&iframe=true" 
+        width="100%" height="140" frameborder="0" scrolling="no">
+</iframe>
+""", unsafe_allow_html=True)
+
 
     col1, col2 = st.columns(2)
 
