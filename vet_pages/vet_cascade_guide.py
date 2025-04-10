@@ -48,20 +48,6 @@ def show():
     st.video("https://www.youtube.com/watch?v=hggZPzVqqJE") 
     st.video("https://youtu.be/vkRWI64hJDI") 
     
-    st.markdown("### 🎧 The Veterinary Prescribing Cascade (Part 1): Equine")
-st.markdown("""
-<iframe src="https://www.buzzsprout.com/1871565/10556201-the-veterinary-prescribing-cascade-part-1-equine?client_source=small_player&iframe=true" 
-        width="100%" height="140" frameborder="0" scrolling="no">
-</iframe>
-""", unsafe_allow_html=True)
-st.markdown("### 🎧 The Veterinary Prescribing Cascade (Part 2): Small Animal")
-st.markdown("""
-<iframe src="https://www.buzzsprout.com/1871565/10557213-the-veterinary-prescribing-cascade-part-2-small-animal?client_source=small_player&iframe=true" 
-        width="100%" height="140" frameborder="0" scrolling="no">
-</iframe>
-""", unsafe_allow_html=True)
-
-
     col1, col2 = st.columns(2)
 
     with col1:
@@ -85,3 +71,25 @@ st.markdown("""
             </a>
         </div>
         """, unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("### 🎙️ Featured Cascade Podcasts")
+
+# Podcast 1 – Equine
+st.markdown("""
+#### 🐴 Part 1: Equine — Dr. Mark Bowen
+_“Demystifying the cascade in equine cases with real-world examples. A must-listen for equine vets.”_
+
+<iframe src="https://www.buzzsprout.com/1871565/10556201-the-veterinary-prescribing-cascade-part-1-equine?client_source=small_player&iframe=true" 
+        width="100%" height="140" frameborder="0" scrolling="no">
+</iframe>
+""", unsafe_allow_html=True)
+
+# Podcast 2 – Small Animal
+st.markdown("""
+#### 🐶 Part 2: Small Animal — Dr. Mark Bowen
+_“Using the cascade in small animal cases, especially antimicrobial use, with post-Brexit context.”_
+
+<iframe src="https://www.buzzsprout.com/1871565/10557213-the-veterinary-prescribing-cascade-part-2-small-animal?client_source=small_player&iframe=true" 
+        width="100%" height="140" frameborder="0" scrolling="no">
+</iframe>
+""", unsafe_allow_html=True)
