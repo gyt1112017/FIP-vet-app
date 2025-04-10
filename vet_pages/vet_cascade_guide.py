@@ -57,7 +57,7 @@ def show():
         _“Demystifying the cascade in equine cases with real-world examples. A must-listen for equine vets.”_
 
         <iframe src="https://www.buzzsprout.com/1871565/10556201-the-veterinary-prescribing-cascade-part-1-equine?client_source=small_player&iframe=true" 
-                width="100%" height="140" frameborder="0" scrolling="no">
+                width="100%" height="160" frameborder="0" scrolling="no">
         </iframe>
         """, unsafe_allow_html=True)
 
@@ -67,31 +67,8 @@ def show():
         _“Using the cascade in small animal cases, especially antimicrobial use, with post-Brexit context.”_
 
         <iframe src="https://www.buzzsprout.com/1871565/10557213-the-veterinary-prescribing-cascade-part-2-small-animal?client_source=small_player&iframe=true" 
-                width="100%" height="140" frameborder="0" scrolling="no">
+                width="100%" height="160" frameborder="0" scrolling="no">
         </iframe>
         """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-            <div style="border:2px solid #9b26b6; border-radius:15px; padding:1rem; margin-bottom:1rem;">
-                <h4 style="color:#9b26b6;">🎥 Cascade Webinars</h4>
-                <p>Regarding the Cascade, how can you legally, as opposed to just medically, justify going straight to (extemporised) reformulation if you have not actually tried other options?’ Present by Danielle Gunn-Moore.</p>
-                <a href="https://bova.vet/2018/07/13/regarding-the-cascade-how-can-you-legally-as-opposed-to-just-medically-justify-going-straight-to-extemporised-reformulation-if-you-have-not-actually-tried-other-options/" target="_blank" style="color:#9b26b6; text-decoration:none; font-weight:bold;">
-                    🔗 Watch Now
-                </a>
-            </div>
-            """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div style="border:2px solid #9b26b6; border-radius:15px; padding:1rem; margin-bottom:1rem;">
-            <h4 style="color:#9b26b6;">🎧 Cascade Podcasts </h4>
-            <p>The veterinary prescribing cascade Small Animal and Equine By  Dr. Mark Bowen BVetMed MMedSci(MedEd) Ph.D. Cert VA Cert EM(IntMed) Dip ECVSMR Dip ACVIMLAIM PFHEA FRCVS.</p>
-            <a href="https://bovaukpodcast.buzzsprout.com/1871565/episodes/10556201-the-veterinary-prescribing-cascade-part-1-equine" target="_blank" style="color:#9b26b6; text-decoration:none; font-weight:bold;">
-                🎧 Listen Now
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
 
