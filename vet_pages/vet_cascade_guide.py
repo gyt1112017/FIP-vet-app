@@ -36,7 +36,7 @@ def show():
     - [Veterinary Prescribing Cascade (VMD)](https://www.gov.uk/guidance/the-cascade-prescribing-unauthorised-medicines)
     - [Cascade: Extemporaneous Preparations – Specials (VMD)](https://www.gov.uk/guidance/the-cascade-prescribing-unauthorised-medicines#extemporaneous-preparations-specials)
     - [RCVS Code of Professional Conduct for Veterinary Surgeons](https://www.rcvs.org.uk/setting-standards/advice-and-guidance/code-of-professional-conduct-for-veterinary-surgeons/supporting-guidance/veterinary-medicines/)
-    
+
     Section 4.15 of the RCVS Code of Professional Conduct states:
     ‘If there is no suitable authorised veterinary medicinal product in the UK for a condition in a particular species, a veterinary surgeon may, in particular, to avoid unacceptable suffering, treat the animal in accordance with the ‘Cascade’.
     """, unsafe_allow_html=True)
@@ -44,9 +44,11 @@ def show():
     # Embed cascade explainer video or link
     st.markdown("---")
     st.markdown("### 🎥 Get confidence with Cascade:")
-    st.markdown("""We know this can be a challenging area to navigate, especially if you are new to using Specials products, so we also have podcasts and a webinar on using the cascade. If you have any questions about the correct use of the cascade then please <a href='https://bova.vet/bova-uk/contact-us/' target='_blank'>get in touch.</a>""", unsafe_allow_html=True)
-    st.video("https://www.youtube.com/watch?v=hggZPzVqqJE") 
-    st.video("https://youtu.be/vkRWI64hJDI") 
+    st.markdown(
+        """We know this can be a challenging area to navigate, especially if you are new to using Specials products, so we also have podcasts and a webinar on using the cascade. If you have any questions about the correct use of the cascade then please <a href='https://bova.vet/bova-uk/contact-us/' target='_blank'>get in touch.</a>""",
+        unsafe_allow_html=True)
+    st.video("https://www.youtube.com/watch?v=hggZPzVqqJE")
+    st.video("https://youtu.be/vkRWI64hJDI")
 
     st.markdown("---")
     st.markdown("### 🎙️ Featured Cascade Podcasts")
@@ -70,5 +72,4 @@ def show():
                 width="100%" height="220" frameborder="0" scrolling="no">
         </iframe>
         """, unsafe_allow_html=True)
-    
 
