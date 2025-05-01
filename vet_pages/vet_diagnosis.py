@@ -1,78 +1,109 @@
-# Page: Diagnosis Guide
 import streamlit as st
-# vet_dry_fip.py
-import streamlit as st
+from utils.styling import apply_theme
+apply_theme()
+from vet_pages import fip_diagnostics, vet_dose_calculator, vet_case_tracker, vet_advice_form, vet_learning, vet_cascade_guide
+from pet_owner_pages import pet_profile
 
-def show():
-    st.title("Dry (Non-Effusive) FIP Diagnostic Tool")
-    st.markdown("Use this flow to interpret your clinical chemistry results.")
+# Ensure rerun works across all Streamlit versions
+rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
 
-    st.markdown("### A/G ratio (albumin / globulin)")
-    ag = st.radio("A/G ratio", ["\> 0.8", "0.4 – 0.8", "< 0.4"], index=1, label_visibility="collapsed")
+# --- Landing Page ---
+if "user_type" not in st.session_state:
+    st.session_state.user_type = None
 
-    st.markdown("### Globulin (g/L)")
-    glob = st.radio("Globulin", ["< 25", "25 – 45", " \> 46"], index=1, label_visibility="collapsed")
+if st.session_state.user_type is None:
+    st.title("Welcome to the FIP Companion App")
+    st.markdown("Are you a:")
+    choice = st.radio("Select user type", ["Veterinary Professional", "Pet Owner"])
+    if st.button("Continue"):
+        st.session_state.user_type = choice
+        rerun()
 
-    st.markdown("### Bilirubin")
-    bili = st.radio("Bilirubin", ["Normal", "Raised"], index=0, label_visibility="collapsed")
+# --- Navigation & Page Routing ---
+elif st.session_state.user_type == "Veterinary Professional":
+    page = st.sidebar.radio("Vet Menu", [
+        "Diagnosis Guide",
+        "Dose Calculator",
+        "Case Tracker",
+        "Advice Form",
+        "FIP Learning Hub",
+        "Vet Cascade Guide"
+    ])
 
-    st.markdown("### Haematocrit (HCT)")
-    hct = st.radio("Haematocrit", [" \> 30%", "< 30%"], index=0, label_visibility="collapsed")
+    if page == "Diagnosis Guide":
+        fip_diagnostics.show()
+    elif page == "Dose Calculator":
+        vet_dose_calculator.show()
+    elif page == "Case Tracker":
+        vet_case_tracker.show()
+    elif page == "Advice Form":
+        vet_advice_form.show()
+    elif page == "FIP Learning Hub":
+        vet_learning.show()
+    elif page == "Vet Cascade Guide":
+        vet_cascade_guide.show()
 
-    st.markdown("### Anaemia type")
-    anaemia = st.radio("Anaemia type", ["Regenerative", "Non-regenerative"], index=0, label_visibility="collapsed")
+elif st.session_state.user_type == "Pet Owner":
+    pet_owner_pages = {
+        "Login / Register": "pet_owner_auth.pet_owner_login",
+        "Pet Profile": "pet_owner_pages.pet_profile",
+    }
 
-    st.markdown("### Lymphocytes")
-    lyph = st.radio("Lymphocytes", ["Normal", "Lymphopenia"], index=0, label_visibility="collapsed")
-
-    st.markdown("### Neutrophils")
-    neut = st.radio("Neutrophils", ["Normal", "Neutrophilia"], index=0, label_visibility="collapsed")
-
-    st.markdown("### FCoV antibody test")
-    fcov = st.radio("FCoV antibody test", ["Negative", "Positive"], index=0, label_visibility="collapsed")
-
-    # Determine likely outcome
-    not_fip = (ag == "\> 0.8" or
-               glob == "25 – 45" and
-               bili == "Normal" and
-               hct == "\> 30%" and
-               anaemia == "Regenerative" and
-               lyph == "Normal" and
-               neut == "Normal" or
-               fcov == "Negative")
-
-    possible = (ag == "< 0.4"
-                or glob == "\> 46"
-                or bili == "Raised"
-                or hct == "< 30%"
-                or anaemia == "Non-regenerative"
-                or lyph == "Lymphopenia"
-                or neut == "Neutrophilia"
-                or fcov == "Positive")
-
-    # Display outcome
-    st.markdown("---")
-    if not_fip:
-        st.success("✅ **NOT FIP** – Normal profile. Consider other causes.")
-    elif possible and fcov == "Negative":
-        st.warning("⚠️ **FIP UNLIKELY** – Antibody negative. Consider other causes.")
-    elif possible and fcov == "Positive":
-        st.warning("⚠️ **FIP POSSIBLE** – Further specialised testing recommended.")
-        st.markdown("""
-        ### 🧪 External Lab Specialised Tests:
-        - **Alpha-1 Glycoprotein (AGP)**  
-          - \> 1500 µg/mL → 🟥 **FIP CONFIRMED: Start PI (Polyprenyl Immunostimulant) immediately**
-          - Normal → Not FIP
-
-        - **FCoV RT-PCR** on:
-          - Aqueous humour  
-          - FNA of mesenteric lymph node (recommended)  
-          - Biopsy (IHC or RT-PCR)
-
-            - If positive → 🟥 **FIP CONFIRMED: Start PI (Polyprenyl Immunostimulant) immediately**
-            - Negative → FIP is not excluded. Consider clinical signs and other differentials diagnoses. 
-        """)
+    # 🧠 Check for post-login redirect
+    if st.session_state.get("redirect_to_profile", False):
+        selected_page = "Pet Profile"
+        st.session_state.redirect_to_profile = False  # Reset the flag
+    elif st.session_state.get("redirect_to_login", False):
+        selected_page = "Login / Register"
+        st.session_state.redirect_to_login = False  # Reset login flag
     else:
-        st.info("ℹ️ **Inconclusive** – consider external lab specialised tests (AGP, FCoV RT-PCR, IHC) based on clinical suspicion.")
+        selected_page = st.sidebar.radio("Pet Owner Menu", list(pet_owner_pages.keys()))
+
+    # Load the selected module dynamically
+    module_path = pet_owner_pages[selected_page]
+    module = __import__(module_path, fromlist=["show"])
+    module.show()
 
 
+
+
+# --- Shared Contact Button ---
+st.sidebar.markdown("---")
+st.sidebar.markdown("### ✨ Need help?")
+if st.session_state.user_type == "pet_owner":
+    pet_owner_pages = {
+        "🐶 Login / Register": "pet_owner_auth.pet_owner_login",
+        "🐾 My Pet Profile": "pet_owner_pages.pet_profile",
+    }
+    selection = st.sidebar.radio("Pet Menu", list(pet_owner_pages.keys()))
+    module_name = pet_owner_pages[selection]
+    __import__(module_name).show()
+
+st.sidebar.markdown("""
+<a href="https://bova.vet/bova-uk/contact-us/" target="_blank">
+    <button class="custom-contact-button">📩 Contact Us</button>
+</a>
+""", unsafe_allow_html=True)
+
+# Option to reset
+if st.sidebar.button("🔄 Switch User Type"):
+    st.session_state.user_type = None
+    rerun()
+
+# --- Dynamic Footer ---
+st.markdown("---")
+if st.session_state.user_type == "Veterinary Professional":
+    st.markdown("""
+    <div style="text-align: center; font-size: 14px; color: #262262;">
+        🩺 Built for vets by Bova UK | For veterinary professionals only. This app is for clinical support and educational use. | <a href="https://bova.vet/bova-uk/" target="_blank" style="color: #9b26b6;">Visit Bova UK</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+elif st.session_state.user_type == "Pet Owner":
+    st.markdown("""
+    <div style="text-align: center; font-size: 14px; color: #262262;">
+        🐾 If you have a query about availability or ordering of medication to treat FIP please email <a href="mailto:sam@bova.co.uk" target="_blank" style="color: #9b26b6;">sam@bova.co.uk </a>
+
+Contact your territory manager direct for the quickest response. | <a href="https://bova.vet/bova-global-home/contact-us/" target="_blank" style="color: #9b26b6;">Learn more</a>
+    </div>
+    """, unsafe_allow_html=True)
