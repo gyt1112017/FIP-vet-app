@@ -1,7 +1,7 @@
 # Page: Dose Calculator
 import streamlit as st
 def show():
-    st.title("💊 Dose Calculator")
+    st.title("Dose Calculator")
 
     # Input
     weight = st.number_input("Patient weight (kg)", min_value=0.1, step=0.1)
@@ -23,7 +23,7 @@ def show():
         daily_volume_ml = round(daily_dose_mg / strength, 2)
         total_volume_ml = round(total_dose_mg / strength, 2)
 
-        st.markdown("### 💊 Dosing Summary")
+        st.markdown("### Dosing Summary")
         st.success(f"""
         **Daily Dose:** {daily_dose_mg} mg  
         **Daily Volume Required:** {daily_volume_ml} ml  
