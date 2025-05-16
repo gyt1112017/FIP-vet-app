@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.styling import apply_theme
 apply_theme()
-from vet_pages import vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_advice_form, vet_learning, vet_cascade_guide
+from vet_pages import vet_login, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_advice_form, vet_learning, vet_cascade_guide
 from pet_owner_pages import pet_profile
 
 # Ensure rerun works across all Streamlit versions
@@ -21,6 +21,13 @@ if st.session_state.user_type is None:
 
 # --- Navigation & Page Routing ---
 elif st.session_state.user_type == "Veterinary Professional":
+    # ───── Vet Auth ─────
+    # If the vet isn't logged in yet, show the login form and stop
+
+    if "vet_user" not in st.session_state:
+       vet_login.login()
+       st.stop()
+
     page = st.sidebar.radio("Vet Menu", [
         "Diagnosis Guide",
         "Dose Calculator",
@@ -49,7 +56,7 @@ elif st.session_state.user_type == "Pet Owner":
         "Pet Profile": "pet_owner_pages.pet_profile",
     }
 
-    # 🧠 Check for post-login redirect
+    # Check for post-login redirect
     if st.session_state.get("redirect_to_profile", False):
         selected_page = "Pet Profile"
         st.session_state.redirect_to_profile = False  # Reset the flag
@@ -69,11 +76,11 @@ elif st.session_state.user_type == "Pet Owner":
 
 # --- Shared Contact Button ---
 st.sidebar.markdown("---")
-st.sidebar.markdown("### ✨ Need help?")
+st.sidebar.markdown("### Need help?")
 if st.session_state.user_type == "pet_owner":
     pet_owner_pages = {
-        "🐶 Login / Register": "pet_owner_auth.pet_owner_login",
-        "🐾 My Pet Profile": "pet_owner_pages.pet_profile",
+        "Login / Register": "pet_owner_auth.pet_owner_login",
+        "My Pet Profile": "pet_owner_pages.pet_profile",
     }
     selection = st.sidebar.radio("Pet Menu", list(pet_owner_pages.keys()))
     module_name = pet_owner_pages[selection]
@@ -81,12 +88,12 @@ if st.session_state.user_type == "pet_owner":
 
 st.sidebar.markdown("""
 <a href="https://bova.vet/bova-uk/contact-us/" target="_blank">
-    <button class="custom-contact-button">📩 Contact Us</button>
+    <button class="custom-contact-button">Contact Us</button>
 </a>
 """, unsafe_allow_html=True)
 
 # Option to reset
-if st.sidebar.button("🔄 Switch User Type"):
+if st.sidebar.button("Switch User Type"):
     st.session_state.user_type = None
     rerun()
 
@@ -95,14 +102,14 @@ st.markdown("---")
 if st.session_state.user_type == "Veterinary Professional":
     st.markdown("""
     <div style="text-align: center; font-size: 14px; color: #262262;">
-        🩺 Built for vets by Bova UK | For veterinary professionals only. This app is for clinical support and educational use. | <a href="https://bova.vet/bova-uk/" target="_blank" style="color: #9b26b6;">Visit Bova UK</a>
+        Built for vets by Bova UK | For veterinary professionals only. This app is for clinical support and educational use. | <a href="https://bova.vet/bova-uk/" target="_blank" style="color: #9b26b6;">Visit Bova UK</a>
     </div>
     """, unsafe_allow_html=True)
 
 elif st.session_state.user_type == "Pet Owner":
     st.markdown("""
     <div style="text-align: center; font-size: 14px; color: #262262;">
-        🐾 If you have a query about availability or ordering of medication to treat FIP please email <a href="mailto:sam@bova.co.uk" target="_blank" style="color: #9b26b6;">sam@bova.co.uk </a>
+        If you have a query about availability or ordering of medication to treat FIP please email <a href="mailto:sam@bova.co.uk" target="_blank" style="color: #9b26b6;">sam@bova.co.uk </a>
 
 Contact your territory manager direct for the quickest response. | <a href="https://bova.vet/bova-global-home/contact-us/" target="_blank" style="color: #9b26b6;">Learn more</a>
     </div>
