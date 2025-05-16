@@ -2,6 +2,12 @@
 import streamlit as st
 from supabase import create_client
 
+# Init Supabase client from Streamlit Cloud secrets
+sb = create_client(
+    st.secrets["supabase"]["url"],
+    st.secrets["supabase"]["key"],
+)
+
 def login():
     st.header("Vet Login")
     email = st.text_input("Email")
