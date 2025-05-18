@@ -10,9 +10,9 @@ sb = create_client(
 
 def login():
     # 0) Grab query params (token_hash & type)
-    params      = st.query_params
-    token_hash  = params.get("token_hash", [None])[0]
-    otp_type    = params.get("type",       ["magiclink"])[0]
+    params = st.query_params
+    token_hash = params.get("token_hash", [None])[0]
+    otp_type = params.get("type", ["magiclink"])[0]
 
     if token_hash:
         # 1) Exchange hash for session & user
@@ -46,21 +46,24 @@ def login():
 
         # Include redirect_to so Supabase builds the correct link
         app_url = "https://fip-vet-app-bova.streamlit.app"
-        res = sb.auth.sign_in_with_otp({
+        try:
+         res = sb.auth.sign_in_with_otp({
             "email": email,
              "options": {
                  "email_redirect_to": app_url
              }
-        }
+         }
         )
-    except Exception as e:
-    # Handle rate limit / AuthApiError when requesting too frequently
-    err_msg = str(e)
-    if "30 seconds" in err_msg or "AuthApiError" in err_msg:
-        st.error("⚠️ Please wait at least 30 seconds before requesting another magic link.")
-    else:
-        st.error(f"Error sending magic link: {err_msg}")
-    return
+
+        except Exception as e:
+        # Handle rate limit / AuthApiError when requesting too frequently
+          err_msg = str(e)
+          if "30 seconds" in err_msg or "AuthApiError" in err_msg:
+             st.error("⚠️ Please wait at least 30 seconds before requesting another magic link.")
+          else:
+             st.error(f"Error sending magic link: {err_msg}")
+          return
+
         err = getattr(res, "error", None) or (res.get("error") if isinstance(res, dict) else None)
 
         if err:
