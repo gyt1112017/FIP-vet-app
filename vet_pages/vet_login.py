@@ -46,11 +46,12 @@ def login():
 
         # Include redirect_to so Supabase builds the correct link
         app_url = "https://fip-vet-app-bova.streamlit.app"
-        res = sb.auth.sign_in_with_otp(
-            {"email": email,
+        res = sb.auth.sign_in_with_otp({
+            "email": email,
              "options": {
                  "email_redirect_to": app_url
              }
+        }
         )
         err = getattr(res, "error", None) or (res.get("error") if isinstance(res, dict) else None)
         if err:
