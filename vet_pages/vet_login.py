@@ -10,7 +10,7 @@ sb = create_client(
 
 def login():
     # ─── 0) Handle the magic-link callback ───
-    params = st.query_params()
+    params = st.query_params
     token  = params.get("token", [None])[0]         # e.g. the TokenHash in your email link
     otp_type = params.get("type", ["magiclink"])[0] # should match 'magiclink'
 
