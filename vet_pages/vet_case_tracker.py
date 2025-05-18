@@ -3,6 +3,7 @@ from supabase import create_client
 from io import BytesIO
 from fpdf import FPDF
 import base64
+import streamlit.components.v1 as components
 
 # Helper to sanitize non-Latin1 chars
 def _sanitize(text):
@@ -189,12 +190,22 @@ def show():
 #           mime='application/pdf')
 
         # 1) Show an inline PDF viewer
-        b64 = base64.b64encode(pdf_bytes).decode()
-        pdf_display = f"""
-            <iframe
-                src="data:application/pdf;base64,{b64}"
-                width="100%" height="600px"
-                style="border: none;"
-            ></iframe>
-        """
-        st.markdown(pdf_display, unsafe_allow_html=True)
+        b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        filename = f"{_sanitize(record['patient_id'])} | {_sanitize(record['patient_name'])}_report.pdf"
+
+        html = f'''
+        <object
+            width="100%" height="800px"
+            type="application/pdf"
+            data="data:application/pdf;base64,{b64}#view=FitH"
+        >
+               <a href="data:application/pdf;base64,{b64}" download="{filename}">
+                 Download the PDF
+               </a>
+            </p>
+        </object>
+        '''
+
+        components.html(html, height=800, scrolling=True)
+
+
