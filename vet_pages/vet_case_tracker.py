@@ -2,14 +2,21 @@ import streamlit as st
 from supabase import create_client
 from io import BytesIO
 from fpdf import FPDF
+
+# Helper to sanitize non-Latin1 chars
 def _sanitize(text):
     try:
         return text.encode('latin-1', 'ignore').decode('latin-1')
     except:
         return str(text)
 
-# Page configuration
+# Main Case Tracker page
 def show():
+    # Rerun helper
+    rerun = st.rerun if hasattr(st, "rerun") else getattr(st, "experimental_rerun", None)
+    if rerun is None:
+        raise RuntimeError("No rerun function available on this Streamlit version")
+
     # Authentication guard
     if "vet_user" not in st.session_state:
         st.warning("Please log in as a veterinary professional to access the Case Tracker.")
@@ -25,83 +32,46 @@ def show():
 
     st.title("FIP Case Tracker")
 
-    # —➕ Add New Case —
-    with st.expander("➕ Add new case", expanded=True):
-        # Animal details
-        patient_id = st.text_input("Patient ID", help="Unique identifier for this patient")
-        patient_name = st.text_input("Patient Name")
-        treatment_date = st.date_input("Treatment Date")
-        weight_kg = st.number_input("Weight (kg)", min_value=0.0, step=0.1)
-        diagnosis = st.text_area("Diagnosis")
-        breed = st.text_input("Breed")
-        age_years = st.number_input("Age (years)", min_value=0, step=1)
-        age_months = st.number_input("Age (months)", min_value=0, max_value=11, step=1)
-        sex = st.selectbox("Sex", ["Male", "Female"])
-        neuter_status = st.selectbox("Neutered status", ["Neutered", "Intact"])
+    # —Add New Case —
+    with st.expander("➕ Add new case", expanded=False):
+        # wrap all your inputs in a form that clears on submit
+        with st.form("add_case_form", clear_on_submit=True):
+            patient_id = st.text_input("Patient ID", help="Unique identifier for this patient")
+            patient_name = st.text_input("Patient Name", help="Name for this patient")
+            breed = st.text_input("Breed", help="Breed")
+            age_years = st.number_input("Age (years)", min_value=0, step=1, help="Age year range")
+            age_months = st.number_input("Age (months)", min_value=0, max_value=11, step=1, help="Age month range")
+            sex = st.selectbox("Sex", ["Male", "Female"], help="Gender")
+            neuter_status = st.selectbox("Neutered status", ["Neutered", "Intact"], help="Neutered status")
+            treatment_date = st.date_input("Treatment Date", help="Date of treatment")
+            weight_kg = st.number_input("Weight (kg)", min_value=0.0, step=0.1, help="Weight (kg)")
+            diagnosis = st.selectbox("Diagnosis", ["Dry FIP", "Wet FIP","Neurological FIP","Ocular FIP"], help="Diagnosis")
+            case_summary = st.text_area('Case Summary', help='Brief summary of clinical signs and diagnostics', placeholder="Summarise duration, clinical signs, weight change, appetite, environment")
 
-        # Clinical history
-        history = st.text_area(
-            "History & Presenting Complaint",
-            help="Summarise duration, clinical signs, weight change, appetite, environment",
-            placeholder="e.g., '2-week diarrhoea with haematochezia, weight loss, normal appetite'"
-        )
+            submitted = st.form_submit_button("Save case")
 
-        # Diagnostic summaries
-        lab_results = st.text_area(
-            "Lab Results",
-            help="Hematology and biochemistry findings (e.g., A:G ratio, ALT/GGT, PCV)",
-            placeholder="Hematology and biochemistry findings (e.g., A:G ratio, ALT/GGT, PCV)"
-        )
-        imaging_findings = st.text_area(
-            "Imaging Findings",
-            help="Ultrasound/radiography results (e.g., effusion, organomegaly)",
-            placeholder="Ultrasound/radiography results (e.g., effusion, organomegaly)"
-        )
-
-        # Effusion/Fluid diagnostics
-        fluid_summary = st.text_area(
-            "Effusion/Fluid Analysis",
-            help="Appearance, protein, cytology, Rivalta, RT-PCR results",
-            placeholder="Appearance, protein, cytology, Rivalta, RT-PCR results"
-        )
-
-        # Treatment & Outcome
-        treatment_plan = st.text_area(
-            "Treatment Plan & Progress",
-            help="Medications, dosage, response, follow-up labs",
-            placeholder="Medications, dosage, response, follow-up labs"
-        )
-        owner_concerns = st.text_area(
-            "Owner Concerns",
-            help="Environmental or historical factors noted by owner",
-            placeholder="Environmental or historical factors noted by owner"
-        )
-
-        # Buttons: Save to database or Save as PDF
-        if st.button("Save case"):
+            if submitted:
                 payload = {
-                    "vet_id": st.session_state.vet_user.id,
-                    "patient_id": patient_id,
-                    "patient_name": patient_name,
-                    "breed": breed,
-                    "age_years": age_years,
-                    "age_months": age_months,
-                    "sex": sex,
-                    "neuter_status": neuter_status,
-                    "history": history,
-                    "diagnosis": diagnosis,
-                    "lab_results": lab_results,
-                    "imaging_findings": imaging_findings,
-                    "fluid_summary": fluid_summary,
-                    "treatment_plan": treatment_plan,
-                    "owner_concerns": owner_concerns,
+                'vet_id':         st.session_state.vet_user.id,
+                'patient_id':     patient_id,
+                'patient_name':   patient_name,
+                'breed':          breed,
+                'age_years':      age_years,
+                'age_months':     age_months,
+                'sex':            sex,
+                'neuter_status':  neuter_status,
+                'treatment_date': treatment_date.isoformat(),
+                'weight_kg':      weight_kg,
+                'diagnosis':      diagnosis,
+                'case_summary':   case_summary,
                 }
                 try:
                     res = sb_admin.table("cases").insert(payload).execute()
                     if getattr(res, "status_code", 200) >= 400:
                         st.error(f"Error saving case: {res.status_code} - {res.status_text}")
                     else:
-                        st.success("✅ Case added to database!")
+                        st.success("Case added to database!")
+                        rerun()
                 except Exception as e:
                     st.error(f"Error saving case: {e}")
 
@@ -111,68 +81,109 @@ def show():
         .select("*")
         .eq("vet_id", st.session_state.vet_user.id)
         .order("created_at", desc=True)
-        .execute()
-        .data
+        .execute().data
     )
 
     st.markdown("---")
-    if cases:
-        # Hide internal columns
-        display_cases = [
-            {k: v for k, v in c.items() if k not in ["id", "vet_id"]}
-            for c in cases
-        ]
-        st.dataframe(display_cases, use_container_width=True)
+    if not cases:
+        st.info("No cases found. Use the form above to add a case.")
+        rerun()
 
-        # Select one case to export
-        case_map = {c.get("patient_id") or c["id"]: c for c in cases}
-        selection = st.selectbox(
-            "Select case to export:",
-            options=list(case_map.keys()),
-            format_func=lambda x: f"{x} | {case_map[x]['patient_name']}"
-        )
-        if st.button("Export to PDF Report"):
-            record = case_map[selection]
-            # Build PDF using selected record, not form variables
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Helvetica", size=16)
-            pdf.cell(0, 10, f"FIP Case Report | {_sanitize(record.get('patient_name', ''))}", ln=True)
-            pdf.ln(4)
-            pdf.set_font("Helvetica", size=12)
-            pdf.cell(0, 8, f"Patient ID: {_sanitize(record.get('patient_id', ''))}", ln=True)
-            pdf.cell(0, 8, f"Treatment Date: {_sanitize(record.get('treatment_date', ''))}", ln=True)
-            pdf.cell(0, 8, f"Weight (kg): {_sanitize(str(record.get('weight_kg', '')))}", ln=True)
-            pdf.cell(0, 8, f"Breed: {_sanitize(record.get('breed', ''))}", ln=True)
-            pdf.cell(0, 8, f"Age: {record.get('age_years', 0)}y {record.get('age_months', 0)}m", ln=True)
-            pdf.cell(0, 8,
-                     f"Sex&Neutered status: {_sanitize(record.get('sex', ''))}, {_sanitize(record.get('neuter_status', ''))}",
-                     ln=True)
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"History & Complaint: {_sanitize(record.get('history', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Diagnosis: {_sanitize(record.get('diagnosis', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Lab Results: {_sanitize(record.get('lab_results', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Imaging Findings: {_sanitize(record.get('imaging_findings', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Fluid Analysis: {_sanitize(record.get('fluid_summary', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Treatment Plan: {_sanitize(record.get('treatment_plan', ''))}")
-            pdf.ln(4)
-            pdf.multi_cell(0, 8, f"Owner Concerns: {_sanitize(record.get('owner_concerns', ''))}")
-            pdf.ln(6)
-            pdf.set_font("Helvetica", size=10)
-            pdf.cell(0, 8, f"Created at: {record.get('created_at', '')}", ln=True)
+    # Display fields without ids
+    display = []
+    for c in cases:
+        display.append({
+                'Patient ID': c.get('patient_id', ''),
+                'Name': c.get('patient_name', ''),
+                'Breed': c.get('breed', ''),
+                'Age': f"{c.get('age_years', 0)}y {c.get('age_months', 0)}m",
+                'Sex': c.get('sex', ''),
+                'Neutered': c.get('neuter_status', ''),
+                'Date': c.get('treatment_date', ''),
+                'Weight kg': c.get('weight_kg', ''),
+                'Diagnosis': c.get('diagnosis', ''),
+                'Summary': c.get('case_summary', ''),
+        })
+    st.dataframe(display, use_container_width=True)
 
-            bio = BytesIO()
-            bio.write(pdf.output(dest="S").encode("latin1", "ignore"))
-            bio.seek(0)
-            st.download_button(
-                "Download Case PDF",
-                data=bio,
-                file_name=f"{_sanitize(record.get('patient_id', ''))}_{_sanitize(record.get('patient_name', ''))}_report.pdf",
-                mime="application/pdf"
-            )
+    # Select and export
+    keys = [c.get('patient_id') or c.get('id') for c in cases]
+    sel = st.selectbox('Select case', options=keys, format_func=lambda x: next(
+        (f"{c['patient_id']} | {c['patient_name']}" for c in cases if (c.get('patient_id') == x or c.get('id') == x)),
+        x))
+    record = next(c for c in cases if (c.get('patient_id') == sel))
+
+    # --- Edit/Delete ---
+    with st.expander('Edit/Delete selected case', expanded=False):
+        e_name = st.text_input('Patient Name', value=record.get('patient_name', ''))
+        e_breed = st.text_input('Breed', value=record.get('breed', ''))
+        e_years = st.number_input('Age (years)', min_value=0, step=1, value=record.get('age_years', 0))
+        e_months = st.number_input('Age (months)', min_value=0, max_value=11, step=1, value=record.get('age_months', 0))
+        e_sex = st.selectbox('Sex', ['Male', 'Female'], index=0 if record.get('sex') == 'Male' else 1)
+        e_neuter = st.selectbox('Neutered status', ['Neutered', 'Intact'],
+                                index=0 if record.get('neuter_status') == 'Neutered' else 1)
+        e_date = st.date_input('Treatment Date', value=record.get('treatment_date'))
+        e_weight = st.number_input('Weight (kg)', min_value=0.0, step=0.1, value=record.get('weight_kg', 0.0))
+        e_diag = st.selectbox('Diagnosis', ['Dry FIP', 'Wet FIP', 'Neurological FIP', 'Ocular FIP'],
+                              index=['Dry FIP', 'Wet FIP', 'Neurological FIP', 'Ocular FIP'].index(record.get('diagnosis', 'Dry FIP')) + 1)
+        e_summary = st.text_area('Case Summary', value=record.get('case_summary', ''))
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button('Update case'):
+                upd = {
+                    'patient_name': e_name,
+                    'breed': e_breed,
+                    'age_years': e_years,
+                    'age_months': e_months,
+                    'sex': e_sex,
+                    'neuter_status': e_neuter,
+                    'treatment_date': e_date.isoformat(),
+                    'weight_kg': e_weight,
+                    'diagnosis': e_diag,
+                    'case_summary': e_summary,
+                }
+                resp = sb_admin.table('cases').update(upd).eq('id', record['id']).execute()
+                if getattr(resp, 'status_code', 200) >= 400:
+                    st.error(f"Update failed: {resp.status_code} - {resp.status_text}")
+                else:
+                    st.success('Case updated')
+                    rerun()
+        with col2:
+            if st.button('Delete case'):
+                resp = sb_admin.table('cases').delete().eq('id', record['id']).execute()
+                if getattr(resp, 'status_code', 200) >= 400:
+                    st.error(f"Delete failed: {resp.status_code} - {resp.status_text}")
+                else:
+                    st.success('🗑️ Case deleted')
+                    rerun()
+
+    if st.button('Export to PDF'):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font('Helvetica', size=16)
+        pdf.cell(0, 10, f"FIP Case Report - {_sanitize(record.get('patient_name', ''))}", ln=True)
+        pdf.ln(4)
+        pdf.set_font('Helvetica', size=12)
+        pdf.multi_cell(0, 8, f"Patient ID: {_sanitize(record.get('patient_id', ''))}")
+        pdf.multi_cell(0, 8, f"Name: {_sanitize(record.get('patient_name', ''))}")
+        pdf.multi_cell(0, 8, f"Breed: {_sanitize(record.get('breed', ''))}")
+        pdf.multi_cell(0, 8, f"Age: {record.get('age_years', 0)}y {record.get('age_months', 0)}m")
+        pdf.multi_cell(0, 8,
+                       f"Sex: {_sanitize(record.get('sex', ''))}, Neutered: {_sanitize(record.get('neuter_status', ''))}")
+        pdf.multi_cell(0, 8, f"Date: {_sanitize(record.get('treatment_date', ''))}")
+        pdf.multi_cell(0, 8, f"Diagnosis: {_sanitize(record.get('diagnosis', ''))}")
+        pdf.multi_cell(0, 8, f"Weight(kg): {_sanitize(record.get('weight_kg', ''))}")
+        pdf.multi_cell(0, 8, f"Summary: {_sanitize(record.get('case_summary', ''))}")
+        bio = BytesIO()
+        bio.write(pdf.output(dest='S').encode('latin1', 'ignore'))
+        bio.seek(0)
+        downloaded = st.download_button('Download Case PDF', data=bio,
+                                        file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
+                                        mime='application/pdf')
+        if downloaded:
+            rerun()
+
+    if st.button("Back to case list"):
+        rerun()
 
