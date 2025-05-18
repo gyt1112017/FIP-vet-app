@@ -124,8 +124,10 @@ def show():
                                 index=0 if record.get('neuter_status') == 'Neutered' else 1)
         e_date = st.date_input('Treatment Date', value=record.get('treatment_date'))
         e_weight = st.number_input('Weight (kg)', min_value=0.0, step=0.1, value=record.get('weight_kg', 0.0))
-        e_diag = st.selectbox('Diagnosis', ['Dry FIP', 'Wet FIP', 'Neurological FIP', 'Ocular FIP'],
-                              index=['Dry FIP', 'Wet FIP', 'Neurological FIP', 'Ocular FIP'].index(record.get('diagnosis', 'Dry FIP')) + 1)
+        # Safe default for diagnosis
+        diag_options = ['Dry FIP', 'Wet FIP', 'Neurological FIP', 'Ocular FIP']
+        default_idx = diag_options.index(record.get('diagnosis')) if record.get('diagnosis') in diag_options else 0
+        e_diag = st.selectbox('Diagnosis', diag_options, index=default_idx)
         e_summary = st.text_area('Case Summary', value=record.get('case_summary', ''))
 
         col1, col2 = st.columns(2)
