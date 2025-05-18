@@ -2,6 +2,7 @@ import streamlit as st
 from supabase import create_client
 from io import BytesIO
 from fpdf import FPDF
+import base64
 
 # Helper to sanitize non-Latin1 chars
 def _sanitize(text):
@@ -178,16 +179,22 @@ def show():
         pdf.multi_cell(0, 8, f"Diagnosis: {_sanitize(record.get('diagnosis', ''))}")
         pdf.multi_cell(0, 8, f"Weight(kg): {_sanitize(record.get('weight_kg', ''))}")
         pdf.multi_cell(0, 8, f"Summary: {_sanitize(record.get('case_summary', ''))}")
-        bio = BytesIO()
-        bio.write(pdf.output(dest='S').encode('latin1', 'ignore'))
-        bio.seek(0)
-        downloaded = st.download_button('Download Case PDF', data=bio,
-                                        file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
-                                        mime='application/pdf')
-        # Give instructions and a manual continue button
-        if downloaded:
-            st.info("✅ PDF download started. When you’re done, tap “Continue” below.")
-            if st.button("↩️ Continue to case list"):
-                st.rerun()
 
+        pdf_bytes = pdf.output(dest="S").encode("latin1", "ignore")
 
+#        st.download_button(
+#           'Download Case PDF',
+#           data=pdf_bytes,
+#           file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
+#           mime='application/pdf')
+
+        # 1) Show an inline PDF viewer
+        b64 = base64.b64encode(pdf_bytes).decode()
+        pdf_display = f"""
+            <iframe
+                src="data:application/pdf;base64,{b64}"
+                width="100%" height="600px"
+                style="border: none;"
+            ></iframe>
+        """
+        st.markdown(pdf_display, unsafe_allow_html=True)
