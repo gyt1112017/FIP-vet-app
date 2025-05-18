@@ -1,7 +1,8 @@
 # vet_pages/vet_login.py
 import streamlit as st
 from supabase import create_client
-
+# Ensure rerun works across all Streamlit versions
+rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
 # Initialize Supabase
 sb = create_client(
     st.secrets["supabase"]["url"],
