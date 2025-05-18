@@ -9,15 +9,15 @@ sb = create_client(
 )
 
 def login():
-    # ─── 0) Handle the magic-link callback ───
-    params = st.query_params
-    token  = params.get("token", [None])[0]         # e.g. the TokenHash in your email link
-    otp_type = params.get("type", ["magiclink"])[0] # should match 'magiclink'
+    # 0) Grab query params (token_hash & type)
+    params      = st.query_params
+    token_hash  = params.get("token_hash", [None])[0]
+    otp_type    = params.get("type",       ["magiclink"])[0]
 
-    if token:
-        # Exchange the token_hash for a session & user
+    if token_hash:
+        # 1) Exchange hash for session & user
         resp = sb.auth.verify_otp({
-            "token_hash": token,   # note: verify_otp expects the hash
+            "token_hash": token_hash,
             "type":       otp_type
         })
         err  = getattr(resp, "error", None)
@@ -26,12 +26,11 @@ def login():
         if err:
             st.error(f"🔐 Magic-link verification failed: {err}")
         else:
-            # Success! Cache the user & rerun so the app unlocks
             st.session_state.vet_user = user
-            st.success("✅ You’re now logged in!")
+            st.success("✅ You’re now logged in via magic link!")
             st.experimental_rerun()
 
-    # ─── 1) If already logged in, nothing else to do ───
+    # 2) If already logged in, stop here
     if "vet_user" in st.session_state:
         return
 
