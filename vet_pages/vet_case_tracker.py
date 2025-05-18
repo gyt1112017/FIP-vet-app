@@ -44,27 +44,28 @@ def show():
             sex = st.selectbox("Sex", ["Male", "Female"], help="Gender")
             neuter_status = st.selectbox("Neutered status", ["Neutered", "Intact"], help="Neutered status")
             treatment_date = st.date_input("Treatment Date", help="Date of treatment")
-            weight_kg = st.number_input("Weight (kg)", min_value=0.0, step=0.1, help="Weight (kg)")
+            weight_kg = st.number_input("Weight (kg)", min_value=0.1, step=0.1, value=0.1, format="%.1f", key="new_weight",help="Weight (kg)")
             diagnosis = st.selectbox("Diagnosis", ["Dry FIP", "Wet FIP","Neurological FIP","Ocular FIP"], help="Diagnosis")
             case_summary = st.text_area('Case Summary', help='Brief summary of clinical signs and diagnostics', placeholder="Summarise duration, clinical signs, weight change, appetite, environment")
 
-            submitted = st.form_submit_button("Save case")
-
-            if submitted:
-                payload = {
-                'vet_id':         st.session_state.vet_user.id,
-                'patient_id':     patient_id,
-                'patient_name':   patient_name,
-                'breed':          breed,
-                'age_years':      age_years,
-                'age_months':     age_months,
-                'sex':            sex,
-                'neuter_status':  neuter_status,
-                'treatment_date': treatment_date.isoformat(),
-                'weight_kg':      weight_kg,
-                'diagnosis':      diagnosis,
-                'case_summary':   case_summary,
-                }
+            if st.form_submit_button("Save case"):
+                if weight_kg <= 0:
+                    st.error("⚠️ Weight (kg) is required and must be greater than 0.")
+                else:
+                    payload = {
+                         'vet_id':         st.session_state.vet_user.id,
+                         'patient_id':     patient_id,
+                         'patient_name':   patient_name,
+                         'breed':          breed,
+                         'age_years':      age_years,
+                         'age_months':     age_months,
+                         'sex':            sex,
+                         'neuter_status':  neuter_status,
+                         'treatment_date': treatment_date.isoformat(),
+                         'weight_kg':      weight_kg,
+                         'diagnosis':      diagnosis,
+                         'case_summary':   case_summary,
+                    }
                 try:
                     res = sb_admin.table("cases").insert(payload).execute()
                     if getattr(res, "status_code", 200) >= 400:
@@ -183,10 +184,10 @@ def show():
         downloaded = st.download_button('Download Case PDF', data=bio,
                                         file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
                                         mime='application/pdf')
+        # Give instructions and a manual continue button
         if downloaded:
             st.info("✅ PDF download started. When you’re done, tap “Continue” below.")
             if st.button("↩️ Continue to case list"):
                 st.rerun()
-
 
 
