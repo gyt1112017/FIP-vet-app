@@ -22,11 +22,10 @@ if st.session_state.user_type is None:
 # --- Navigation & Page Routing ---
 elif st.session_state.user_type == "Veterinary Professional":
     # ───── Vet Auth ─────
-    # If the vet isn't logged in yet, show the login form and stop
-
+    import vet_pages.vet_login as vl
+    vl.login()
     if "vet_user" not in st.session_state:
-       vet_login.login()
-       st.stop()
+        st.stop()
 
     page = st.sidebar.radio("Vet Menu", [
         "Diagnosis Guide",
