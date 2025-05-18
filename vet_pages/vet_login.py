@@ -53,7 +53,16 @@ def login():
              }
         }
         )
+    except Exception as e:
+    # Handle rate limit / AuthApiError when requesting too frequently
+    err_msg = str(e)
+    if "30 seconds" in err_msg or "AuthApiError" in err_msg:
+        st.error("⚠️ Please wait at least 30 seconds before requesting another magic link.")
+    else:
+        st.error(f"Error sending magic link: {err_msg}")
+    return
         err = getattr(res, "error", None) or (res.get("error") if isinstance(res, dict) else None)
+
         if err:
             msg = err.get("message") if isinstance(err, dict) else err
             st.error(f"Error sending magic link: {msg}")
