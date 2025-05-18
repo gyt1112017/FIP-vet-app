@@ -44,10 +44,13 @@ def login():
             st.error("Please enter an email address.")
             return
 
-        # This triggers Supabase to email a magic-link to the vet
-        res = sb.auth.sign_in_with_otp({"email": email})
+        # Include redirect_to so Supabase builds the correct link
+        app_url = "https://fip-vet-app-bova.streamlit.app"
+        res = sb.auth.sign_in_with_otp(
+            {"email": email},
+            {"redirect_to": app_url}
+        )
         err = getattr(res, "error", None) or (res.get("error") if isinstance(res, dict) else None)
-
         if err:
             msg = err.get("message") if isinstance(err, dict) else err
             st.error(f"Error sending magic link: {msg}")
