@@ -2,48 +2,48 @@
 import streamlit as st
 from supabase import create_client
 
-# Init Supabase client from Streamlit Cloud secrets
+# Init Supabase client from your Streamlit Cloud secrets
 sb = create_client(
     st.secrets["supabase"]["url"],
     st.secrets["supabase"]["key"],
 )
 
 def login():
-    st.header("Vet Login")
-    email = st.text_input("Email")
-    pw    = st.text_input("Password", type="password")
+    st.header("Vet Login via Magic Link")
+    st.write("Enter your work email and we'll send you a secure login link.")
+    email = st.text_input("Email", placeholder="you@clinic.com")
 
-    if st.button("Log in"):
-        # pick the right auth method for your client version
-        auth_fn = (
-            sb.auth.sign_in_with_password
-            if hasattr(sb.auth, "sign_in_with_password")
-            else sb.auth.sign_in
-        )
-
-        # perform the request in a try/except
-        try:
-            # v2 style: dict argument
-            res = auth_fn({"email": email, "password": pw})
-        except Exception as e:
-            st.error(f"Authentication request failed:\n{e}")
+    if st.button("Send Magic Link"):
+        if not email:
+            st.error("Please enter your email address.")
             return
 
-        # supabase-py v2 returns an object with .user / .error
-        user = getattr(res, "user", None)
-        error = getattr(res, "error", None)
+        try:
+            # This triggers Supabase to email a magic-link to the vet
+            res = sb.auth.sign_in_with_otp({
+                'email': email,
+                'options': {
+                'should_create_user': False,
+                'email_redirect_to': 'https://fip-vet-app-bova.streamlit.app/',
+            },
+            })
 
+        except Exception as e:
+            st.error(f"Failed to send magic link:\n{e}")
+            return
+
+        # supabase-py v2 returns an object with .error
+        err = getattr(res, "error", None)
         # supabase-py v1 returns a dict
-        if user is None and isinstance(res, dict):
-            user = res.get("user")
-            error = res.get("error")
+        if not err and isinstance(res, dict):
+            err = res.get("error")
 
-        if user:
-            st.session_state.vet_user = user
-            st.session_state.user_type = "Veterinary Professional"  # ← mark them as a vet
-            st.session_state.vet_menu = "Diagnosis Guide"  # ← pre-select the first page
-            st.success("Logged in successfully!")
+        if err:
+            # Present whatever message Supabase returned
+            msg = err.get("message") if isinstance(err, dict) else err
+            st.error(f"Error sending magic link: {msg}")
         else:
-            err_msg = error["message"] if isinstance(error, dict) and "message" in error else error
-            st.error(f"Login failed: {err_msg}")
-
+            st.success(
+                "Magic link sent! Check your inbox for an email from us."
+            )
+            st.stop()
