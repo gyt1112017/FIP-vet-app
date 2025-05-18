@@ -3,3 +3,4 @@ supabase
 storage3
 postgrest
 fpdf
+pybase64
