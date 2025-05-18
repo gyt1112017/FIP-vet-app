@@ -41,7 +41,6 @@ def login():
         if user:
             st.session_state.vet_user = user
             st.success("✅ Logged in successfully!")
-            st.experimental_rerun()
         else:
             err_msg = error["message"] if isinstance(error, dict) and "message" in error else error
             st.error(f"Login failed: {err_msg}")
