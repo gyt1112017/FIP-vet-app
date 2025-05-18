@@ -184,8 +184,7 @@ def show():
                                         file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
                                         mime='application/pdf')
         if downloaded:
-            rerun()
+            st.rerun()
 
-    if st.button("Back to case list"):
-        rerun()
+
 
