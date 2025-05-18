@@ -3,7 +3,7 @@ from supabase import create_client
 from io import BytesIO
 from fpdf import FPDF
 import base64
-import streamlit.components.v1 as components
+
 
 # Helper to sanitize non-Latin1 chars
 def _sanitize(text):
@@ -183,29 +183,18 @@ def show():
 
         pdf_bytes = pdf.output(dest="S").encode("latin1", "ignore")
 
-#        st.download_button(
-#           'Download Case PDF',
-#           data=pdf_bytes,
-#           file_name=f"{_sanitize(record.get('patient_id', ''))} | {_sanitize(record.get('patient_name', ''))}_report.pdf",
-#           mime='application/pdf')
-
-        # 1) Show an inline PDF viewer
         b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        url = f"data:application/pdf;base64,{b64}"
         filename = f"{_sanitize(record['patient_id'])} | {_sanitize(record['patient_name'])}_report.pdf"
 
-        html = f'''
-        <object
-            width="100%" height="800px"
-            type="application/pdf"
-            data="data:application/pdf;base64,{b64}#view=FitH"
-        >
-               <a href="data:application/pdf;base64,{b64}" download="{filename}">
-                 Download the PDF
-               </a>
-            </p>
-        </object>
-        '''
+        # Single-line HTML (no leading spaces!)
+        link_html = (
+            f'<a href="{url}" '
+            f'download="{filename}" '
+            f'target="_blank" '
+            f'style="font-size:1.1em; text-decoration:none;">'
+            "📄 Download Case PDF (new tab)"
+            "</a>"
+        )
 
-        components.html(html, height=800, scrolling=True)
-
-
+        st.markdown(link_html, unsafe_allow_html=True)
