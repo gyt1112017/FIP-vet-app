@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.styling import apply_theme
 apply_theme()
-from vet_pages import vet_login, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_advice_form, vet_learning, vet_cascade_guide
+from vet_pages import vet_login, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_learning, vet_cascade_guide
 from pet_owner_pages import pet_profile
 
 # Ensure rerun works across all Streamlit versions
@@ -31,7 +31,6 @@ elif st.session_state.user_type == "Veterinary Professional":
         "Diagnosis Guide",
         "Dose Calculator",
         "Case Tracker",
-        "Advice Form",
         "FIP Learning Hub",
         "Vet Cascade Guide"
     ])
@@ -42,8 +41,6 @@ elif st.session_state.user_type == "Veterinary Professional":
         vet_dose_calculator.show()
     elif page == "Case Tracker":
         vet_case_tracker.show()
-    elif page == "Advice Form":
-        vet_advice_form.show()
     elif page == "FIP Learning Hub":
         vet_learning.show()
     elif page == "Vet Cascade Guide":
