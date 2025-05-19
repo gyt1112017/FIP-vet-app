@@ -52,7 +52,7 @@ def show():
 
             if st.form_submit_button("Save case"):
                 if weight_kg <= 0:
-                    st.error("⚠️ Weight (kg) is required and must be greater than 0.")
+                    st.error("Weight (kg) is required and must be greater than 0.")
                 else:
                     payload = {
                          'vet_id':         st.session_state.vet_user.id,
@@ -90,7 +90,7 @@ def show():
     st.markdown("---")
     if not cases:
         st.info("No cases found. Use the form above to add a case.")
-        return()
+        return
 
     # Display fields without ids
     display = []
@@ -187,7 +187,6 @@ def show():
         url = f"data:application/pdf;base64,{b64}"
         filename = f"{_sanitize(record['patient_id'])} | {_sanitize(record['patient_name'])}_report.pdf"
 
-        # Single-line HTML (no leading spaces!)
         link_html = (
             f'<a href="{url}" '
             f'download="{filename}" '
@@ -198,3 +197,28 @@ def show():
         )
 
         st.markdown(link_html, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown(
+        """
+        If you have a query about availability or ordering of medication to treat FIP please email <a href="mailto:sam@bova.co.uk">sam@bova.co.uk</a><br>
+        Contact your <a href="https://bova.vet/bova-uk/contact-us/" target="_blank">territory manager</a> direct for the quickest response  
+        <br>
+        If you are a veterinary professional and need advice on the diagnosis and/or treatment of a cat with suspected or confirmed FIP, please complete the contact form below and include as much information as possible to allow us to answer. You can upload results and case history.<br>
+
+        Your query will be answered by an RCVS Recognised Feline Specialist as soon as possible—please indicate if your query is urgent.<br>
+
+        Please note we are not able to provide advice directly to cat caregivers for legal reasons, so please ask your veterinarian to complete the form.
+        """,
+        unsafe_allow_html=True
+    )
+
+    with st.expander("Questions about your case", expanded=False):
+        st.markdown("""
+            <iframe src="https://share-eu1.hsforms.com/2-vQDDglDQEiXj5qyyc9Vzwg2km5"
+                    width="100%" height="2150" style="border: none;">
+            </iframe>
+            """, unsafe_allow_html=True)
+
+
+
