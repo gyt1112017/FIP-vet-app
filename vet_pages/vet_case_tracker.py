@@ -90,7 +90,7 @@ def show():
     st.markdown("---")
     if not cases:
         st.info("No cases found. Use the form above to add a case.")
-        rerun()
+        return()
 
     # Display fields without ids
     display = []
