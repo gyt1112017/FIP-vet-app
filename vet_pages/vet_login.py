@@ -1,48 +1,70 @@
-# vet_pages/vet_login.py
 import streamlit as st
 from supabase import create_client
-# Ensure rerun works across all Streamlit versions
 rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
-# Initialize Supabase
+
+# Initialize Supabase client
 sb = create_client(
-    st.secrets["supabase"]["url"],
-    st.secrets["supabase"]["key"],
+    st.secrets['supabase']['url'],
+    st.secrets['supabase']['key'],
 )
 
+# Vet login via email OTP (one-time password)
 def login():
-    st.header("🔐 Vet Login")
-    email = st.text_input("Email")
-    pw    = st.text_input("Password", type="password")
+    # If already logged in, nothing to do
+    if 'vet_user' in st.session_state:
+        return
 
-    if st.button("Log in"):
-        # pick the right auth method for your client version
-        auth_fn = (
-            sb.auth.sign_in_with_password
-            if hasattr(sb.auth, "sign_in_with_password")
-            else sb.auth.sign_in
-        )
+    st.header('Vet Login via Email OTP')
+    st.write('Enter your work email, receive a 6-digit code, then verify to sign in.')
 
-        # perform the request in a try/except
-        try:
-            # v2 style: dict argument
-            res = auth_fn({"email": email, "password": pw})
-        except Exception as e:
-            st.error(f"Authentication request failed:\n{e}")
-            return
+    # Email input
+    email = st.text_input('Email', placeholder='you@clinic.com', key='otp_email')
 
-        # supabase-py v2 returns an object with .user / .error
-        user = getattr(res, "user", None)
-        error = getattr(res, "error", None)
-
-        # supabase-py v1 returns a dict
-        if user is None and isinstance(res, dict):
-            user = res.get("user")
-            error = res.get("error")
-
-        if user:
-            st.session_state.vet_user = user
-            st.success("✅ Logged in successfully!")
-            rerun()
+    # Send OTP button
+    if st.button('Send OTP Code'):
+        if not email:
+            st.error('Please enter your email address.')
         else:
-            err_msg = error["message"] if isinstance(error, dict) and "message" in error else error
-            st.error(f"Login failed: {err_msg}")
+            try:
+                res = sb.auth.sign_in_with_otp({
+                    'email': email,
+                    'options': {
+                        'should_create_user': False
+                    }
+                })
+            except Exception as e:
+                st.error(f'Error sending OTP: {e}')
+            else:
+                err = getattr(res, 'error', None) or (res.get('error') if isinstance(res, dict) else None)
+                if err:
+                    msg = err.get('message') if isinstance(err, dict) else err
+                    st.error(f'Failed to send OTP: {msg}')
+                else:
+                    st.success('✅ OTP sent! Check your email inbox.')
+                    st.session_state.otp_requested = True
+
+    # If OTP was requested, show verification input
+    if st.session_state.get('otp_requested'):
+        code = st.text_input('Enter OTP Code', placeholder='123456', key='otp_code')
+        if st.button('Verify Code'):
+            if not code:
+                st.error('Please enter the OTP code you received.')
+            else:
+                try:
+                    resp = sb.auth.verify_otp({
+                        'email': email,
+                        'token': code,
+                        'type': 'email'
+                    })
+                except Exception as e:
+                    st.error(f'Error verifying OTP: {e}')
+                else:
+                    err = getattr(resp, 'error', None) or (resp.get('error') if isinstance(resp, dict) else None)
+                    user = getattr(resp, 'user', None)
+                    if err or not user:
+                        msg = err.get('message') if isinstance(err, dict) else err or 'Unknown error.'
+                        st.error(f'OTP verification failed: {msg}')
+                    else:
+                        st.session_state.vet_user = user
+                        st.success('Logged in successfully!')
+                        rerun()
