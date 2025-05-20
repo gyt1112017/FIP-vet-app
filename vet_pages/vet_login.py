@@ -13,14 +13,16 @@ def login():
     # If already logged in, nothing to do
     if 'vet_user' in st.session_state:
         return
+    if 'otp_requested' not in st.session_state:
+        st.session_state['otp_requested'] = False
 
-    st.header('Vet Register/Login via Email OTP')
+    st.header('Vet Login')
     st.write('Enter your work email, receive a 6-digit code, then verify to sign in.')
 
     # Email input
     email = st.text_input('Email', placeholder='you@clinic.com', key='otp_email')
 
-    # Send OTP button
+    # Step 1: Send OTP code (auto-creates user if new)
     if st.button('Send OTP Code'):
         if not email:
             st.error('Please enter your email address.')
@@ -33,17 +35,17 @@ def login():
                     }
                 })
             except Exception as e:
-                st.error(f'Error sending OTP: {e}')
-            else:
-                err = getattr(res, 'error', None) or (res.get('error') if isinstance(res, dict) else None)
-                if err:
+                st.info("It looks like you haven't registered yet. Now please switch to **Register** in the sidebar to register")
+                return
+            err = getattr(res, 'error', None) or (res.get('error') if isinstance(res, dict) else None)
+            if err:
                     msg = err.get('message') if isinstance(err, dict) else err
                     st.error(f'Failed to send OTP: {msg}')
-                else:
+            else:
                     st.success('OTP sent! Check your email inbox.')
                     st.session_state.otp_requested = True
 
-    # If OTP was requested, show verification input
+    # Step 2: Verify OTP code
     if st.session_state.get('otp_requested'):
         code = st.text_input('Enter OTP Code', placeholder='123456', key='otp_code')
         if st.button('Verify Code'):
@@ -58,13 +60,14 @@ def login():
                     })
                 except Exception as e:
                     st.error(f'Error verifying OTP: {e}')
+                    return
+
+                err = getattr(resp, 'error', None) or (resp.get('error') if isinstance(resp, dict) else None)
+                user = getattr(resp, 'user', None)
+                if err or not user:
+                    msg = err.get('message') if isinstance(err, dict) else err or 'Unknown error.'
+                    st.error(f'OTP verification failed: {msg}')
                 else:
-                    err = getattr(resp, 'error', None) or (resp.get('error') if isinstance(resp, dict) else None)
-                    user = getattr(resp, 'user', None)
-                    if err or not user:
-                        msg = err.get('message') if isinstance(err, dict) else err or 'Unknown error.'
-                        st.error(f'OTP verification failed: {msg}')
-                    else:
-                        st.session_state.vet_user = user
-                        st.success('Logged in successfully!')
-                        rerun()
+                    st.session_state.vet_user = user
+                    st.success('Logged in successfully!')
+                    rerun()
