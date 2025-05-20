@@ -1,7 +1,7 @@
 import streamlit as st
 from utils.styling import apply_theme
 apply_theme()
-from vet_pages import vet_login, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_learning, vet_cascade_guide
+from vet_pages import vet_login, vet_signup, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_learning, vet_cascade_guide
 from pet_owner_pages import pet_profile
 
 # Ensure rerun works across all Streamlit versions
@@ -21,11 +21,17 @@ if st.session_state.user_type is None:
 
 # --- Navigation & Page Routing ---
 elif st.session_state.user_type == "Veterinary Professional":
+    choice = st.sidebar.selectbox("Vet Access", ["Register", "Login"], key="vet_auth_mode")
     # ───── Vet Auth ─────
-    import vet_pages.vet_login as vl
-    vl.login()
-    if "vet_user" not in st.session_state:
+    if choice == "Register":
+        from vet_pages.vet_signup import register
+        register()
         st.stop()
+    else:
+        from vet_pages.vet_login import login
+        login()
+        if "vet_user" not in st.session_state:
+            st.stop()
 
     page = st.sidebar.radio("Vet Menu", [
         "Diagnosis Guide",
