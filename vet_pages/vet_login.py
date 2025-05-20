@@ -14,7 +14,7 @@ def login():
     if 'vet_user' in st.session_state:
         return
 
-    st.header('Vet Login via Email OTP')
+    st.header('Vet Register/Login via Email OTP')
     st.write('Enter your work email, receive a 6-digit code, then verify to sign in.')
 
     # Email input
@@ -40,7 +40,7 @@ def login():
                     msg = err.get('message') if isinstance(err, dict) else err
                     st.error(f'Failed to send OTP: {msg}')
                 else:
-                    st.success('✅ OTP sent! Check your email inbox.')
+                    st.success('OTP sent! Check your email inbox.')
                     st.session_state.otp_requested = True
 
     # If OTP was requested, show verification input
