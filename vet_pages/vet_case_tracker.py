@@ -216,7 +216,7 @@ def show():
     with st.expander("Questions about your case", expanded=False):
         st.markdown("""
             <iframe src="https://share-eu1.hsforms.com/2-vQDDglDQEiXj5qyyc9Vzwg2km5"
-                    width="100%" height="2150" style="border: none;">
+                    width="100%" height="2500" style="border: none;">
             </iframe>
             """, unsafe_allow_html=True)
 
