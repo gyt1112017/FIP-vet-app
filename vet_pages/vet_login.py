@@ -1,6 +1,6 @@
 import streamlit as st
 from supabase import create_client
-from utils.sidebar import show_shared_sidebar
+
 rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
 
 # Initialize Supabase client
@@ -11,7 +11,7 @@ sb = create_client(
 
 # Vet login via email OTP (one-time password)
 def login():
-    show_shared_sidebar(rerun)
+
     # If already logged in, nothing to do
     if 'vet_user' in st.session_state:
         return
@@ -73,3 +73,4 @@ def login():
                     st.session_state.vet_user = user
                     st.success('Logged in successfully!')
                     rerun()
+
