@@ -1,6 +1,7 @@
 # vet_pages/vet_register.py
 import streamlit as st
 from supabase import create_client
+from utils.sidebar import show_shared_sidebar
 rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
 # Admin client (service role) to query existing users
 tmp = create_client(
@@ -14,6 +15,7 @@ sb = create_client(
 )
 
 def register():
+    show_shared_sidebar(rerun)
     st.header("Vet Registration")
     st.write("Enter your work email to register. If your email is already in our system, you'll need to switch to login.")
 
@@ -62,6 +64,3 @@ def register():
         else:
             st.success("Registration code sent! Check your email to complete registration.")
             rerun()
-
-
-
