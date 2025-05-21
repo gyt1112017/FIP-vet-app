@@ -15,7 +15,7 @@ sb = create_client(
 )
 
 def register():
-    show_shared_sidebar(rerun)
+
     st.header("Vet Registration")
     st.write("Enter your work email to register. If your email is already in our system, you'll need to switch to login.")
 
@@ -64,3 +64,6 @@ def register():
         else:
             st.success("Registration email sent! Check your email to confirm.")
             rerun()
+
+    show_shared_sidebar(rerun)
+
