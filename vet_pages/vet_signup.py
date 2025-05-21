@@ -20,7 +20,7 @@ def register():
     st.write("Enter your work email to register. If your email is already in our system, you'll need to switch to login.")
 
     email = st.text_input("Email", placeholder="you@clinic.com", key="register_email")
-    if st.button("Send Registration Code", key="send_register_otp"):
+    if st.button("Send Registration Email", key="send_register_otp"):
         if not email:
             st.error("Please enter your email address.")
             return
@@ -54,13 +54,13 @@ def register():
         try:
             res = sb.auth.sign_in_with_otp({"email": email})
         except Exception as e:
-            st.error(f"Error sending registration code: {e}")
+            st.error(f"Error sending registration email: {e}")
             return
 
         err = getattr(res, 'error', None) or (res.get('error') if isinstance(res, dict) else None)
         if err:
             msg = err.get('message') if isinstance(err, dict) else err
-            st.error(f"Failed to send registration code: {msg}")
+            st.error(f"Failed to send registration email: {msg}")
         else:
-            st.success("Registration code sent! Check your email to complete registration.")
+            st.success("Registration email sent! Check your email to confirm.")
             rerun()
