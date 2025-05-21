@@ -42,6 +42,8 @@ elif st.session_state.user_type == "Veterinary Professional":
         "Vet Cascade Guide"
     ])
 
+    show_shared_sidebar(rerun)
+
     if page == "Diagnosis Guide":
         vet_diagnosis.show()
     elif page == "Dose Calculator":
@@ -63,23 +65,19 @@ elif st.session_state.user_type == "Pet Owner":
     if st.session_state.get("redirect_to_profile", False):
         selected_page = "Pet Profile"
         st.session_state.redirect_to_profile = False  # Reset the flag
+        show_shared_sidebar(rerun)
     elif st.session_state.get("redirect_to_login", False):
         selected_page = "Login / Register"
         st.session_state.redirect_to_login = False  # Reset login flag
+        show_shared_sidebar(rerun)
     else:
         selected_page = st.sidebar.radio("Pet Owner Menu", list(pet_owner_pages.keys()))
+        show_shared_sidebar(rerun)
 
     # Load the selected module dynamically
     module_path = pet_owner_pages[selected_page]
     module = __import__(module_path, fromlist=["show"])
     module.show()
-
-
-
-
-# --- Sidebar ---
-
-show_shared_sidebar(rerun)
 
 # --- Dynamic Footer ---
 st.markdown("---")
