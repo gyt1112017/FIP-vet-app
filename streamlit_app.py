@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.styling import apply_theme
 apply_theme()
+from utils.sidebar import show_shared_sidebar
 from vet_pages import vet_login, vet_signup, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_learning, vet_cascade_guide
 from pet_owner_pages import pet_profile
 
@@ -76,28 +77,9 @@ elif st.session_state.user_type == "Pet Owner":
 
 
 
-# --- Shared Contact Button ---
-st.sidebar.markdown("---")
-st.sidebar.markdown("### Need help?")
-if st.session_state.user_type == "pet_owner":
-    pet_owner_pages = {
-        "Login / Register": "pet_owner_auth.pet_owner_login",
-        "My Pet Profile": "pet_owner_pages.pet_profile",
-    }
-    selection = st.sidebar.radio("Pet Menu", list(pet_owner_pages.keys()))
-    module_name = pet_owner_pages[selection]
-    __import__(module_name).show()
+# --- Sidebar ---
 
-st.sidebar.markdown("""
-<a href="https://bova.vet/bova-uk/contact-us/" target="_blank">
-    <button class="custom-contact-button">Contact Us</button>
-</a>
-""", unsafe_allow_html=True)
-
-# Option to reset
-if st.sidebar.button("Switch User Type"):
-    st.session_state.user_type = None
-    rerun()
+show_shared_sidebar(rerun)
 
 # --- Dynamic Footer ---
 st.markdown("---")
@@ -111,8 +93,6 @@ if st.session_state.user_type == "Veterinary Professional":
 elif st.session_state.user_type == "Pet Owner":
     st.markdown("""
     <div style="text-align: center; font-size: 14px; color: #262262;">
-        If you have a query about availability or ordering of medication to treat FIP please email <a href="mailto:sam@bova.co.uk" target="_blank" style="color: #9b26b6;">sam@bova.co.uk </a>
-
-Contact your territory manager direct for the quickest response. | <a href="https://bova.vet/bova-global-home/contact-us/" target="_blank" style="color: #9b26b6;">Learn more</a>
+        <a>If you have a query about availability or ordering of medication to treat FIP please contact your vet</a>
     </div>
     """, unsafe_allow_html=True)
