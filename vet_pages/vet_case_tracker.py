@@ -1,9 +1,51 @@
 import streamlit as st
 from supabase import create_client
-from io import BytesIO
+from datetime import datetime
+from io import StringIO
+import uuid
 from fpdf import FPDF
 import base64
+from datetime import timedelta
 
+#create .ics calendar reminder
+def _make_ics(dt: datetime, summary: str, description: str, repeat: str) -> str:
+    """Return a simple VCALENDAR string for a single event."""
+    uid = uuid.uuid4()
+    dtstamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    dtstart = dt.strftime("%Y%m%dT%H%M%S")
+    dtend = (dt + timedelta(hours=1)).strftime("%Y%m%dT%H%M%S")
+
+    # Build the RRULE if needed
+    if repeat == "Daily":
+        rrule = "RRULE:FREQ=DAILY;INTERVAL=1"
+    elif repeat == "Weekly":
+        rrule = "RRULE:FREQ=WEEKLY;INTERVAL=1"
+    elif repeat == "Monthly":
+        rrule = "RRULE:FREQ=MONTHLY;INTERVAL=1"
+    else:
+        rrule = ""
+
+    # Put DTEND and RRULE in the right order
+    ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Bova FIP App//EN",
+        "BEGIN:VEVENT",
+        f"UID:{uid}",
+        f"DTSTAMP:{dtstamp}",
+        f"DTSTART:{dtstart}",
+        f"DTEND:{dtend}",
+    ]
+    if rrule:
+        ics.append(rrule)
+    ics += [
+        f"SUMMARY:{summary}",
+        f"DESCRIPTION:{description}",
+        "END:VEVENT",
+        "END:VCALENDAR",
+    ]
+    # Join with CRLF per RFC5545
+    return "\r\n".join(ics) + "\r\n"
 
 # Helper to sanitize non-Latin1 chars
 def _sanitize(text):
@@ -163,6 +205,37 @@ def show():
                     st.success('🗑️ Case deleted')
                     rerun()
 
+    with st.expander('Set a Follow-Up Reminder', expanded=False):
+
+        col1, col2 = st.columns(2)
+        with col1:
+            r_date = st.date_input("Date")
+        with col2:
+            r_time = st.time_input("Time")
+        summary = st.text_input(
+            "Reminder summary",
+            value=f"Follow up on case {record['patient_id']} – {record['patient_name']}"
+         )
+        description = st.text_area("More details (optional)")
+
+        repeat = st.selectbox(
+            "Repeat",
+            ["None", "Daily", "Weekly", "Monthly"],
+            help="If you pick Weekly, this reminder will recur every week."
+        )
+
+        if st.button("Generate .ics & Download"):
+            dt = datetime.combine(r_date, r_time)
+            ics_text = _make_ics(dt, summary, description, repeat)
+            buffer = StringIO(ics_text)
+            st.download_button(
+                label="Download Reminder (ICS)",
+                data=buffer.getvalue(),
+                file_name=f"FIP_case_{record['patient_id']}_{record['patient_name']}_reminder.ics",
+                mime="text/calendar"
+            )
+
+
     if st.button('Export to PDF'):
         pdf = FPDF()
         pdf.add_page()
@@ -216,9 +289,6 @@ def show():
     with st.expander("Questions about your case", expanded=False):
         st.markdown("""
             <iframe src="https://share-eu1.hsforms.com/2-vQDDglDQEiXj5qyyc9Vzwg2km5"
-                    width="100%" height="3000" style="border: none;">
+                    width="100%" height="2150" style="border: none;">
             </iframe>
             """, unsafe_allow_html=True)
-
-
-
