@@ -3,7 +3,7 @@ from utils.styling import apply_theme
 apply_theme()
 from utils.sidebar import show_shared_sidebar
 from vet_pages import vet_login, vet_signup, vet_diagnosis, vet_dose_calculator, vet_case_tracker, vet_learning, vet_cascade_guide
-from pet_owner_pages import pet_profile
+from pet_owner_pages import pet_owner_login, pet_owner_register, pet_profile
 
 # Ensure rerun works across all Streamlit versions
 rerun = st.rerun if hasattr(st, "rerun") else st.experimental_rerun
@@ -56,28 +56,37 @@ elif st.session_state.user_type == "Veterinary Professional":
         vet_cascade_guide.show()
 
 elif st.session_state.user_type == "Pet Owner":
-    pet_owner_pages = {
-        "Login / Register": "pet_owner_auth.pet_owner_login",
-        "Pet Profile": "pet_owner_pages.pet_profile",
-    }
-
-    # Check for post-login redirect
-    if st.session_state.get("redirect_to_profile", False):
-        selected_page = "Pet Profile"
-        st.session_state.redirect_to_profile = False  # Reset the flag
-        show_shared_sidebar(rerun)
-    elif st.session_state.get("redirect_to_login", False):
-        selected_page = "Login / Register"
-        st.session_state.redirect_to_login = False  # Reset login flag
-        show_shared_sidebar(rerun)
+    # ─── Auth Step ───
+    auth_choice = st.sidebar.selectbox(
+        "Pet Owner Access",
+        ["Register", "Login"],
+        key="po_auth_mode",
+    )
+    if auth_choice == "Register":
+        import pet_owner_pages.pet_owner_register as por
+        por.register()
+        st.stop()
     else:
-        selected_page = st.sidebar.radio("Pet Owner Menu", list(pet_owner_pages.keys()))
-        show_shared_sidebar(rerun)
+        import pet_owner_pages.pet_owner_login as pol
+        pol.login()
+        if "pet_user" not in st.session_state:
+            # still not logged in? stop here
+            st.stop()
 
-    # Load the selected module dynamically
-    module_path = pet_owner_pages[selected_page]
-    module = __import__(module_path, fromlist=["show"])
-    module.show()
+    # ─── Main Menu ───
+    page = st.sidebar.radio(
+        "Pet Owner Menu",
+        ["Pet Profile"],
+        key="po_menu"
+    )
+
+    # ─── Shared Contact/Switch ───
+    show_shared_sidebar(rerun)
+
+    # ─── Dispatch ───
+    if page == "Pet Profile":
+        pet_profile.show()
+    show_shared_sidebar(rerun)
 
 # --- Dynamic Footer ---
 st.markdown("---")
